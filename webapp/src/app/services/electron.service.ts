@@ -9,10 +9,10 @@ import { SharedService } from './sharedService';
 export class ElectronService implements SharedService {
 	private static readonly storageName = 'assetsPath';
 	private static readonly modName = 'selectedMod';
-	private static readonly wrapName = 'wrapEventEditorLines';
+	private static readonly wrapLinesName = 'wrapEventEditorLines';
 	private static assetsPath = '';
 	private static selectedMod = '';
-	private static wrapEventEditorLines = true;
+	private static wrapEventEditorLines = true; //This is also the default value if the user hasn't changed any setting
 	
 	private readonly fs?: typeof nodeFs;
 	private readonly remote?: Remote;
@@ -38,7 +38,7 @@ export class ElectronService implements SharedService {
 		ElectronService.updateURL();
 		ElectronService.selectedMod = localStorage.getItem(this.modName) || '';
 		await ElectronService.updateMod();
-		ElectronService.wrapEventEditorLines = (localStorage.getItem(this.wrapName) === 'true') || ElectronService.wrapEventEditorLines;
+		ElectronService.wrapEventEditorLines = (localStorage.getItem(ElectronService.wrapLinesName) || ElectronService.wrapEventEditorLines.toString()) === 'true';
 	}
 	
 	private static normalizePath(p: string) {
@@ -107,9 +107,8 @@ export class ElectronService implements SharedService {
 		await ElectronService.updateMod();
 	}
 	
-	public saveWrap (wrap: boolean) {
-		localStorage.setItem (ElectronService.wrapName, wrap? 'true' : 'false');
-		ElectronService.wrapEventEditorLines = wrap;
+	public saveWrapEventEditorLinesSetting(wrap: boolean) {
+		localStorage.setItem(ElectronService.wrapLinesName, wrap? 'true' : 'false');
 	}
 	
 	public getAssetsPath() {
@@ -120,7 +119,7 @@ export class ElectronService implements SharedService {
 		return ElectronService.selectedMod;
 	}
 	
-	public getWrap () {
+	public getWrapEventEditorLinesSetting() {
 		return ElectronService.wrapEventEditorLines;
 	}
 }
