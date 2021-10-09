@@ -76,6 +76,18 @@ export class PhaserComponent implements OnInit {
 		);
 	}
 	
+	onMouseEnter() {
+		if (!Globals.game.loop.running) {
+			Globals.game.loop.wake();
+		}
+	}
+	
+	onMouseLeave() {
+		if (Globals.game.loop.running) {
+			Globals.game.loop.stop();
+		}
+	}
+	
 	private getScale() {
 		const rect = this.content.nativeElement.getBoundingClientRect();
 		return {
