@@ -19,6 +19,7 @@ import { EntityRegistryService } from '../../shared/phaser/entities/registry/ent
 export class PhaserComponent implements OnInit {
 	
 	@ViewChild('content', {static: true}) content!: ElementRef<HTMLElement>;
+	private mouseOverPhaser = false;
 	
 	constructor(
 		private element: ElementRef,
@@ -76,16 +77,34 @@ export class PhaserComponent implements OnInit {
 		);
 	}
 	
-	onMouseEnter() {
-		if (!Globals.game.loop.running) {
-			Globals.game.loop.wake();
+	@HostListener('mouseenter')
+	mouseEnter() {
+		this.mouseOverPhaser = true;
+		this.updatePhaserSleep();
+	}
+	
+	@HostListener('mouseleave')
+	mouseLeave() {
+		this.mouseOverPhaser = false;
+		this.updatePhaserSleep();
+	}
+	
+	private setPhaserRunning(runPhaser: boolean) {
+		if (runPhaser) {
+			if (!Globals.game.loop.running) {
+				Globals.game.loop.wake();
+				console.info('Phaser running.');
+			}
+		} else {
+			if (Globals.game.loop.running) {
+				Globals.game.loop.stop();
+				console.info('Phaser sleeping.');
+			}
 		}
 	}
 	
-	onMouseLeave() {
-		if (Globals.game.loop.running) {
-			Globals.game.loop.stop();
-		}
+	private updatePhaserSleep() {
+		this.setPhaserRunning(this.mouseOverPhaser);
 	}
 	
 	private getScale() {
