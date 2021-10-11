@@ -25,7 +25,7 @@ export class ShowSideMsg extends AbstractEvent<ShowSideMsgData> {
 	
 	update() {
 		this.info = this.combineStrings(
-			this.getColoredString(this.data.person.person + '>' + this.data.person.expression, '#bfa24c'),
+			this.getColoredString(this.data.person.person + '>&#8203;' + this.data.person.expression, '#bfa24c'),
 			this.data.message.en_US
 		);
 	}
