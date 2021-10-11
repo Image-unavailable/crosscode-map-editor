@@ -19,6 +19,8 @@ import { EntityRegistryService } from '../../shared/phaser/entities/registry/ent
 export class PhaserComponent implements OnInit {
 	
 	@ViewChild('content', {static: true}) content!: ElementRef<HTMLElement>;
+	private mouseOverPhaser = false;
+	private loadingMap = false;
 	
 	constructor(
 		private element: ElementRef,
@@ -62,6 +64,20 @@ export class PhaserComponent implements OnInit {
 			scene: [scene]
 		});
 		Globals.scene = scene;
+		
+		//Started loading a map
+		this.mapLoader.map.subscribe(() => {
+			console.info('Map loading started!');
+			this.loadingMap = true;
+			this.updatePhaserSleep();
+		});
+		//Finished loading a map (also called after initial editor loading)
+		this.globalEvents.currentView.subscribe(() => {
+			console.info('Map loading complete!');
+			this.loadingMap = false;
+			this.updatePhaserSleep();
+			Globals.game.loop.step(); //Draw a final "complete" version of the scene before toggling phaser off
+		});
 	}
 	
 	@HostListener('window:resize', ['$event'])
@@ -76,16 +92,34 @@ export class PhaserComponent implements OnInit {
 		);
 	}
 	
-	onMouseEnter() {
-		if (!Globals.game.loop.running) {
-			Globals.game.loop.wake();
+	@HostListener('mouseenter')
+	mouseEnter() {
+		this.mouseOverPhaser = true;
+		this.updatePhaserSleep();
+	}
+	
+	@HostListener('mouseleave')
+	mouseLeave() {
+		this.mouseOverPhaser = false;
+		this.updatePhaserSleep();
+	}
+	
+	private setPhaserRunning(runPhaser: boolean) {
+		if (runPhaser) {
+			if (!Globals.game.loop.running) {
+				Globals.game.loop.wake();
+				console.info('Phaser running.');
+			}
+		} else {
+			if (Globals.game.loop.running) {
+				Globals.game.loop.stop();
+				console.info('Phaser sleeping.');
+			}
 		}
 	}
 	
-	onMouseLeave() {
-		if (Globals.game.loop.running) {
-			Globals.game.loop.stop();
-		}
+	private updatePhaserSleep() {
+		this.setPhaserRunning(this.loadingMap || this.mouseOverPhaser);
 	}
 	
 	private getScale() {
