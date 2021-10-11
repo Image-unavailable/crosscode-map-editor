@@ -67,13 +67,11 @@ export class PhaserComponent implements OnInit {
 		
 		//Started loading a map
 		this.mapLoader.map.subscribe(() => {
-			console.info('Map loading started!');
 			this.loadingMap = true;
 			this.updatePhaserSleep();
 		});
 		//Finished loading a map (also called after initial editor loading)
 		this.globalEvents.currentView.subscribe(() => {
-			console.info('Map loading complete!');
 			this.loadingMap = false;
 			this.updatePhaserSleep();
 			Globals.game.loop.step(); //Draw a final "complete" version of the scene before toggling phaser off
@@ -108,12 +106,10 @@ export class PhaserComponent implements OnInit {
 		if (runPhaser) {
 			if (!Globals.game.loop.running) {
 				Globals.game.loop.wake();
-				console.info('Phaser running.');
 			}
 		} else {
 			if (Globals.game.loop.running) {
 				Globals.game.loop.stop();
-				console.info('Phaser sleeping.');
 			}
 		}
 	}
