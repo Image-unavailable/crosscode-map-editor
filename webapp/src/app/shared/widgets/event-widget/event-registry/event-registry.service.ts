@@ -5,6 +5,7 @@ import {If} from './if';
 import {ShowMsg} from './show-msg';
 import {ShowSideMsg} from './show-side-msg';
 import {ShowChoice} from './ShowChoice';
+import {OpenQuestDialog} from './open-quest-dialogue';
 import {SetPlayerCore} from './set-player-core';
 import {ClearSlowMotion} from './clear-slow-motion';
 import {SetOverlay} from './set-overlay';
@@ -46,6 +47,7 @@ export class EventRegistryService {
 		this.register('WAIT', Wait);
 		this.register('LABEL', Label);
 		this.register('GOTO_LABEL', GotoLabel);
+		this.register('OPEN_QUEST_DIALOG', OpenQuestDialog);
 		
 	}
 	
