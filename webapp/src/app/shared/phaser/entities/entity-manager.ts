@@ -268,11 +268,14 @@ export class EntityManager extends BaseObject {
 		}
 		
 		// concurrent entity loading
-		const promises: Promise<any>[] = []; 
-		for (const entity of map.entities) {
-			promises.push(this.generateEntity(entity));
-		}
-		await Promise.all(promises);
+		const orderedEntities = new Array<CCEntity | undefined>(map.entities.length); //Starts full of undefined
+		await Promise.all(map.entities.map(
+			async (entity, index) => orderedEntities[index] = await this.generateEntity(entity)
+		));
+		//Reassigning the array does not work (probably somewhere something keeps a reference of the unordered array)
+		//so to make it work we have to clear the unordered array and copy the contents of the ordered one into it.
+		this._entities.length = 0;
+		this._entities.push(...(orderedEntities as CCEntity[])); //All entities loaded so cast is safe
 	}
 	
 	
