@@ -25,7 +25,7 @@ export class LayersComponent implements OnInit {
 	constructor(private mapLoader: MapLoaderService,
 				private stateHistory: StateHistoryService,
 				private http: HttpClientService,
-				events: GlobalEventsService) {
+				private events: GlobalEventsService) {
 		events.toggleVisibility.subscribe(() => {
 			if (this.selectedLayer) {
 				this.toggleVisibility({
@@ -50,6 +50,7 @@ export class LayersComponent implements OnInit {
 	toggleVisibility(event: Event, layer: CCMapLayer) {
 		event.stopPropagation();
 		layer.visible = !layer.visible;
+		this.events.toggleLayerVisibility.next();
 		if (layer.visible) {
 			this.selectLayer(layer);
 		}
