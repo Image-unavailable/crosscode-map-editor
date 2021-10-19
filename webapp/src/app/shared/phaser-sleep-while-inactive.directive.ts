@@ -3,17 +3,17 @@ import * as Phaser from 'phaser';
 import {GlobalEventsService} from './global-events.service';
 import {MapLoaderService} from './map-loader.service';
 
-//TODO: forward updates from app-sidenav
 @Directive({
 	selector: '[appPhaserSleepWhileInactive]',
 })
 export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	@Input() attachedGame: Phaser.Game | undefined;
-	@Input() log = false;
+	@Input() log = false; //Logging is on level 4 of the console, which is hidden by default
 	@Input() activeOverride?: boolean;
 	private mouseOver = false;
 	private loadingMap = false;
 	private windowResized = false;
+	private tilesChanged = false;
 	
 	constructor(
 		private globalEvents: GlobalEventsService,
@@ -22,7 +22,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	}
 	
 	public get defaultActive() {
-		return this.loadingMap || this.mouseOver || this.windowResized;
+		return this.loadingMap || this.mouseOver || this.windowResized || this.tilesChanged;
 	}
 	
 	ngOnInit() {
@@ -36,22 +36,31 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 			this.loadingMap = false;
 			//Always step after scene load is completed, even if phaser was stopped before finishing the loading
 			this.updatePhaserSleep(false);
-			this.attachedGame?.loop.step();
+			this.stepUnlessOverridden();
+		});
+		//Tile updates
+		this.mapLoader.selectedLayer.subscribe(() => {
+			//Calling this.stepUnlessOverridden() here doesn't update the tile selector properly probably due to the async operations in it,
+			//using this allows the override by the tile selector component to take effect (At least that's why I think it works, not too sure about it).
+			//Either way it does not seem to be affected by how long the tile selector takes to load the tilemap (1000ms times are fine).
+			this.tilesChanged = true;
+		});
+		this.globalEvents.toggleLayerVisibility.subscribe(() => {
+			this.tilesChanged = true;
 		});
 	}
 	
 	ngDoCheck() {
 		this.updatePhaserSleep();
-		this.windowResized = false;
+		this.tilesChanged = false;
 	}
 	
-	//This is where the actual sleep control is, the rest of the code is for monitoring events and applying changes
 	updatePhaserSleep(stepOnStop = true) {
 		const appliedRunningStatus = this.setPhaserRunning(this.activeOverride ?? this.defaultActive);
 		if (stepOnStop && appliedRunningStatus === false) {
 			this.attachedGame?.loop.step();
 			if (this.log) {
-				console.info('Stepped phaser!');
+				console.debug('Stepped phaser after sleep update.');
 			}
 		}
 	}
@@ -80,7 +89,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 			if (!this.attachedGame.loop.running) {
 				this.attachedGame.loop.wake();
 				if (this.log) {
-					console.info('Phaser running!');
+					console.debug('Phaser running.');
 				}
 				return true;
 			}
@@ -88,11 +97,20 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 			if (this.attachedGame.loop.running) {
 				this.attachedGame.loop.stop();
 				if (this.log) {
-					console.info('Phaser stopped!');
+					console.debug('Phaser stopped.');
 				}
 				return false;
 			}
 		}
 		return undefined;
+	}
+	
+	private stepUnlessOverridden() {
+		if (this.activeOverride !== false) {
+			this.attachedGame?.loop.step();
+			if (this.log) {
+				console.debug('Stepped phaser once.');
+			}
+		}
 	}
 }
