@@ -3,6 +3,7 @@ import * as Phaser from 'phaser';
 import {GlobalEventsService} from './global-events.service';
 import {MapLoaderService} from './map-loader.service';
 
+//TODO: update when an entity is created
 @Directive({
 	selector: '[appPhaserSleepWhileInactive]',
 })
@@ -52,6 +53,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	
 	ngDoCheck() {
 		this.updatePhaserSleep();
+		this.windowResized = false;
 		this.tilesChanged = false;
 	}
 	
