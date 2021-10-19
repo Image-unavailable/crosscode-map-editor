@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, HostListener} from '@angular/core';
+import {OnInit, Component, HostListener} from '@angular/core';
 import * as Phaser from 'phaser';
 import {TileSelectorScene} from './tile-selector.scene';
 import {GlobalEventsService} from '../../shared/global-events.service';
@@ -11,9 +11,9 @@ import {NavigationStart, Router} from '@angular/router';
 	templateUrl: './tile-selector.component.html',
 	styleUrls: ['./tile-selector.component.scss']
 })
-export class TileSelectorComponent implements AfterViewInit {
-	private display?: Phaser.Game;
-	private scene?: TileSelectorScene;
+export class TileSelectorComponent implements OnInit {
+	scene?: TileSelectorScene;
+	display?: Phaser.Game;
 	hide = false;
 	
 	constructor(
@@ -30,7 +30,7 @@ export class TileSelectorComponent implements AfterViewInit {
 		});
 	}
 	
-	ngAfterViewInit() {
+	ngOnInit() {
 		this.scene = new TileSelectorScene();
 		this.display = new Phaser.Game({
 			width: 400 * window.devicePixelRatio,
