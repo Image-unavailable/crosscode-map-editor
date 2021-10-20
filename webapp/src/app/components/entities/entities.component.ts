@@ -65,7 +65,10 @@ export class EntitiesComponent {
 			vec2Widget.def = def;
 		}
 		Object.entries(entity.getAttributes()).forEach(([key, val]) => {
-			this.generateWidget(entity, key, val, ref);
+			const createdWidget = this.generateWidget(entity, key, val, ref);
+			createdWidget.onChange.subscribe(() => {
+				this.events.updateEntitySettings.next(entity);
+			});
 		});
 	}
 	
@@ -80,6 +83,7 @@ export class EntitiesComponent {
 		instance.entity = entity;
 		instance.key = key;
 		instance.attribute = val;
+		
 		return instance;
 	}
 }

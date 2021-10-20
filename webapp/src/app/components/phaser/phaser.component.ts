@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, AfterViewChecked, DoCheck, ViewChild } from '@angular/core';
 import { MapLoaderService } from '../../shared/map-loader.service';
 import { GlobalEventsService } from '../../shared/global-events.service';
 import { Globals } from '../../shared/globals';
@@ -16,9 +16,12 @@ import { EntityRegistryService } from '../../shared/phaser/entities/registry/ent
 	templateUrl: './phaser.component.html',
 	styleUrls: ['./phaser.component.scss']
 })
-export class PhaserComponent implements OnInit {
+export class PhaserComponent implements OnInit, AfterViewChecked, DoCheck {
 	
 	@ViewChild('content', {static: true}) content!: ElementRef<HTMLElement>;
+	private mustReset = false;
+	createdEntity = false;
+	entityModified = false;
 	
 	constructor(
 		private element: ElementRef,
@@ -62,6 +65,12 @@ export class PhaserComponent implements OnInit {
 			scene: [scene]
 		});
 		Globals.scene = scene;
+		this.globalEvents.generateNewEntity.subscribe(() => {
+			this.createdEntity = true;
+		});
+		this.globalEvents.updateEntitySettings.subscribe(() => {
+			this.entityModified = true;
+		});
 	}
 	
 	@HostListener('window:resize', ['$event'])
@@ -74,6 +83,22 @@ export class PhaserComponent implements OnInit {
 			scale.width,
 			scale.height
 		);
+	}
+	
+	ngAfterViewChecked() {
+		if (this.createdEntity || this.entityModified) {
+			//This only works if the reset is done *after* all the changes have been applied and the sleep directive started running phaser,
+			//but since angular complains about changes in afterViewChecked, using this flag we do the same thing but without causing problems
+			this.mustReset = true; 
+		}
+	}
+	
+	ngDoCheck() {
+		if (this.mustReset) {
+			this.createdEntity = false;
+			this.entityModified = false;
+			this.mustReset = false;
+		}
 	}
 	
 	get globalGame() {

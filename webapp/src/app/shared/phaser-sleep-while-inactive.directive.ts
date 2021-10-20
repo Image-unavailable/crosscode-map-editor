@@ -47,7 +47,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 			this.tilesChanged = true;
 		});
 		this.globalEvents.toggleLayerVisibility.subscribe(() => {
-			this.tilesChanged = true;
+			this.tilesChanged = true; //Same behaviour as mapLoader.selectedLayer
 		});
 	}
 	
