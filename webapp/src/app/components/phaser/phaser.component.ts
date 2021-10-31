@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, AfterViewChecked, DoCheck, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { MapLoaderService } from '../../shared/map-loader.service';
 import { GlobalEventsService } from '../../shared/global-events.service';
 import { Globals } from '../../shared/globals';
@@ -10,18 +10,17 @@ import { MainScene } from '../../shared/phaser/main-scene';
 import { HeightMapService } from '../../services/height-map/height-map.service';
 import { AutotileService } from '../../services/autotile/autotile.service';
 import { EntityRegistryService } from '../../shared/phaser/entities/registry/entity-registry.service';
+import { PhaserSleepWhileInactiveDirective } from '../../shared/phaser-sleep-while-inactive.directive';
 
 @Component({
 	selector: 'app-phaser',
 	templateUrl: './phaser.component.html',
 	styleUrls: ['./phaser.component.scss']
 })
-export class PhaserComponent implements OnInit, AfterViewChecked, DoCheck {
+export class PhaserComponent implements OnInit {
 	
 	@ViewChild('content', {static: true}) content!: ElementRef<HTMLElement>;
-	private mustReset = false;
-	createdEntity = false;
-	entityModified = false;
+	@ViewChild(PhaserSleepWhileInactiveDirective, {static: true}) sleepDirective!: PhaserSleepWhileInactiveDirective;
 	
 	constructor(
 		private element: ElementRef,
@@ -65,12 +64,9 @@ export class PhaserComponent implements OnInit, AfterViewChecked, DoCheck {
 			scene: [scene]
 		});
 		Globals.scene = scene;
-		this.globalEvents.generateNewEntity.subscribe(() => {
-			this.createdEntity = true;
-		});
-		this.globalEvents.updateEntitySettings.subscribe(() => {
-			this.entityModified = true;
-		});
+		this.globalEvents.generateNewEntity.subscribe(() => this.sleepDirective.requestRedraw());
+		this.globalEvents.updateEntitySettings.subscribe(() => this.sleepDirective.requestRedraw());
+		this.globalEvents.filterEntity.subscribe(() => this.sleepDirective.requestRedraw());
 	}
 	
 	@HostListener('window:resize', ['$event'])
@@ -83,22 +79,6 @@ export class PhaserComponent implements OnInit, AfterViewChecked, DoCheck {
 			scale.width,
 			scale.height
 		);
-	}
-	
-	ngAfterViewChecked() {
-		if (this.createdEntity || this.entityModified) {
-			//This only works if the reset is done *after* all the changes have been applied and the sleep directive started running phaser,
-			//but since angular complains about changes in afterViewChecked, using this flag we do the same thing but without causing problems
-			this.mustReset = true; 
-		}
-	}
-	
-	ngDoCheck() {
-		if (this.mustReset) {
-			this.createdEntity = false;
-			this.entityModified = false;
-			this.mustReset = false;
-		}
 	}
 	
 	get globalGame() {

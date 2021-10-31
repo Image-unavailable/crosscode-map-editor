@@ -14,7 +14,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	private mouseOver = false;
 	private loadingMap = false;
 	private windowResized = false;
-	private tilesChanged = false;
+	private redrawRequested = false;
 	
 	constructor(
 		private globalEvents: GlobalEventsService,
@@ -23,7 +23,14 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	}
 	
 	public get defaultActive() {
-		return this.loadingMap || this.mouseOver || this.windowResized || this.tilesChanged;
+		return this.loadingMap || this.mouseOver || this.windowResized || this.redrawRequested;
+	}
+	
+	public requestRedraw() {
+		//Calling this.stepUnlessOverridden() here doesn't update the tile selector properly probably due to the async operations in it,
+		//using this allows the override by the tile selector component to take effect (At least that's why I think it works, not too sure about it).
+		//Either way it does not seem to be affected by how long the tile selector takes to load the tilemap (1000ms times are fine).
+		this.redrawRequested = true;
 	}
 	
 	ngOnInit() {
@@ -40,27 +47,20 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 			this.stepUnlessOverridden();
 		});
 		//Tile updates
-		this.mapLoader.selectedLayer.subscribe(() => {
-			//Calling this.stepUnlessOverridden() here doesn't update the tile selector properly probably due to the async operations in it,
-			//using this allows the override by the tile selector component to take effect (At least that's why I think it works, not too sure about it).
-			//Either way it does not seem to be affected by how long the tile selector takes to load the tilemap (1000ms times are fine).
-			this.tilesChanged = true;
-		});
-		this.globalEvents.toggleLayerVisibility.subscribe(() => {
-			this.tilesChanged = true; //Same behaviour as mapLoader.selectedLayer
-		});
+		this.mapLoader.selectedLayer.subscribe(() => this.requestRedraw());
+		this.globalEvents.toggleLayerVisibility.subscribe(() => this.requestRedraw());
 	}
 	
 	ngDoCheck() {
 		this.updatePhaserSleep();
 		this.windowResized = false;
-		this.tilesChanged = false;
+		this.redrawRequested = false;
 	}
 	
 	updatePhaserSleep(stepOnStop = true) {
 		const appliedRunningStatus = this.setPhaserRunning(this.activeOverride ?? this.defaultActive);
 		if (stepOnStop && appliedRunningStatus === false) {
-			this.attachedGame?.loop.step();
+			this.attachedGame?.loop.tick();
 			if (this.log) {
 				console.debug('Stepped phaser after sleep update.');
 			}
@@ -109,7 +109,7 @@ export class PhaserSleepWhileInactiveDirective implements OnInit, DoCheck {
 	
 	private stepUnlessOverridden() {
 		if (this.activeOverride !== false) {
-			this.attachedGame?.loop.step();
+			this.attachedGame?.loop.tick();
 			if (this.log) {
 				console.debug('Stepped phaser once.');
 			}
