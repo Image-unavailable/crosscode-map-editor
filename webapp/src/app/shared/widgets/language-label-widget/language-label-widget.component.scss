@@ -1,18 +1,41 @@
-div.language-row {
+$label-width: 50px;
+
+div.row {
 	flex: 1 1 0;
 	margin-bottom: 4px;
 	
-	& > label {
-		width: 65px;
+	&.has-value {
+		align-items: center;
+		align-self: flex-end;
 	}
-	& > textarea {
-		resize: none;
-		padding: 4px;
+	
+	&.language {
+		& label {
+			width: $label-width;
+		}
+		
+		& div {
+			padding: 4px;
+			display: inline-block;
+			height: unset;
+		}
+		
+		& textarea {
+			resize: none;
+			padding: 0px;
+			width: 100%;
+			height: 100%;
+			outline: none;
+		}
 	}
-}
-
-div.language-string-container {
-	flex: 1 1 0;
+	
+	&.uid {
+		align-items: center;
+		
+		label {
+			width: $label-width;
+		}
+	}
 }
 
 textarea {
