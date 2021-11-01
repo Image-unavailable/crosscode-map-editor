@@ -36,6 +36,12 @@ export abstract class AbstractEvent<T extends EventType> {
 	
 	public abstract update(): void;
 	
+	//Added to properly edit START_NPC_TRADE_MENU.
+	//Used when changes in an event affect child nodes that would otherwise not get updated.
+	public get forceTreeRefresh(): boolean {
+		return false;
+	}
+	
 	public export(): T {
 		return JSON.parse(JSON.stringify(this.data));
 	}
