@@ -103,7 +103,7 @@ export class EventEditorComponent implements OnChanges, OnInit {
 			this.shownNode.text = this.shownNode.data?.info ?? ' ';
 			this.shownNode.changeDetector?.detectChanges();
 			
-			if (this.shownNode.children) {
+			if (this.shownNode.children || this.shownNode.data?.forceTreeRefresh) {
 				this.refreshAll();
 			}
 		}
