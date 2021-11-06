@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, Output, EventEmitter, ViewChild, DoCheck} from '@angular/core';
+import {Component, OnInit, Input, Output, EventEmitter, ViewChild} from '@angular/core';
 import {NPCState} from '../npc-states-widget.component';
 import * as settingsJson from '../../../../../assets/npc-settings.json';
 import {EventEditorComponent} from '../../event-widget/event-editor/editor/event-editor.component';
@@ -10,7 +10,7 @@ import { EventType } from '../../event-widget/event-registry/abstract-event';
 	templateUrl: './npc-states.component.html',
 	styleUrls: ['./npc-states.component.scss', '../../widget.scss'],
 })
-export class NpcStatesComponent implements OnInit, DoCheck {	
+export class NpcStatesComponent implements OnInit {	
 	@ViewChild('eventEditor', {static: false}) eventEditor?: EventEditorComponent;
 	
 	@Input() states: NPCState[] = [];
@@ -19,6 +19,7 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 	index = 0;
 	
 	props = settingsJson.default;
+	eventTypes = Object.values(EventArrayType);
 	warnings: string[] = [];
 	private missingTradeEvent = false;
 	
@@ -47,27 +48,19 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 		this.selectTab(this.index);
 	}
 	
-	ngDoCheck() {
-		this.warnings.length = 0;
-		if (this.isTradeEvent && !this.trader) {
-			this.warnings.push('Missing trader name');
-		}
-		if (this.eventType === EventArrayType.Trade && this.missingTradeEvent) {
-			this.warnings.push('START_NPC_TRADE_MENU event is missing, trade popup will not appear');
-		}
-	}
-	
 	selectTab(index: number) {
 		if (this.currentState) {
 			if (!this.eventEditor) {
 				throw new Error('event editor is not defined');
 			}
-			this.currentState.event = this.eventEditor.export(this.eventType, this.trader);
+			this.currentState.event = createEventArray(this.eventEditor.export(), this.eventType, this.trader);
 			this.eventEditor.show();
 		}
 		this.currentState = this.states[index];
 		this.index = index;
-		({type: this.eventType, trader: this.trader} = destructureEventArray(this.currentState.event));
+		if (this.currentState) { //Undefined if this.states.length is 0
+			({type: this.eventType, trader: this.trader} = destructureEventArray(this.currentState.event));
+		}
 	}
 	
 	newPage() {
@@ -97,7 +90,7 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 		if (!this.eventEditor) {
 			throw new Error('event editor is not defined');
 		}
-		this.currentState.event = this.eventEditor.export();
+		this.currentState.event = createEventArray(this.eventEditor.export(), this.eventType, this.trader);
 		this.clipboard = JSON.stringify(this.currentState);
 		console.log(JSON.parse(this.clipboard));
 	}
@@ -117,7 +110,7 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 			throw new Error('event editor is not defined');
 		}
 		if (this.currentState) {
-			this.currentState.event = this.eventEditor.export(this.eventType, this.trader);
+			this.currentState.event = createEventArray(this.eventEditor.export(), this.eventType, this.trader);
 		}
 		const out = this.states;
 		out.forEach(state => {
@@ -139,13 +132,26 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 		this.exit.error('cancel');
 	}
 	
-	updateEventWarnings(updatedEvents: EventType[]) {
+	updateDisplayedWarnings() {
+		this.warnings.length = 0;
+		if (this.isTradeEvent) {
+			if (!this.trader) {
+				this.warnings.push('Missing trader name');
+			}
+			
+			if (this.missingTradeEvent) {
+				this.warnings.push('START_NPC_TRADE_MENU event is missing, trade popup will not appear');
+			}
+		}
+	}
+	
+	updateTradeEventWarning(updatedEvents: EventType[]) {
 		function hasEventOfTypeRecursive(object: any, type: string): boolean {
-			if (typeof object !== 'object') {
+			if (typeof object !== 'object' || object === null) {
 				return false;
 			}
-			for (const key of Object.keys(object)) {
-				if ((key === 'type' && object[key] === type) || hasEventOfTypeRecursive(object[key], type)) {
+			for (const [key, value] of Object.entries(object)) {
+				if ((key === 'type' && value === type) || hasEventOfTypeRecursive(value, type)) {
 					return true;
 				}
 			}
@@ -155,13 +161,11 @@ export class NpcStatesComponent implements OnInit, DoCheck {
 		this.missingTradeEvent =
 			updatedEvents.length > 0 &&
 			!hasEventOfTypeRecursive(updatedEvents, 'START_NPC_TRADE_MENU');
+		
+		this.updateDisplayedWarnings();
 	}
 	
 	get isTradeEvent() {
 		return this.eventType === EventArrayType.Trade;
-	}
-	
-	get eventTypes(): string[] {
-		return Object.keys(EventArrayType).map(name => (EventArrayType as any)[name]);
 	}
 }
