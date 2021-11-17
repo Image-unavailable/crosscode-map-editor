@@ -20,7 +20,6 @@ import {KeepHtmlPipe} from './keep-html.pipe';
 import {SettingsComponent} from '../components/dialogs/settings/settings.component';
 import {OverlayModule} from './overlay/overlay.module';
 import {PhaserSleepWhileInactiveDirective} from './phaser-sleep-while-inactive.directive';
-import {AutosizeTextareaOnResizeDirective} from './autosize-textarea-on-resize.directive';
 
 import {MapContentSettingsComponent} from '../components/dialogs/map-settings/map-content-settings/map-content-settings.component';
 import {HighlightDirective} from './highlight.directive';
@@ -57,7 +56,6 @@ import { SplitPaneModule } from './split-pane/split-pane.module';
 		HighlightDirective,
 		ListSearchOverlayComponent,
 		PhaserSleepWhileInactiveDirective,
-		AutosizeTextareaOnResizeDirective,
 	],
 	providers: [
 		HttpClientService,
@@ -91,7 +89,6 @@ import { SplitPaneModule } from './split-pane/split-pane.module';
 		HighlightDirective,
 		SplitPaneComponent,
 		PhaserSleepWhileInactiveDirective,
-		AutosizeTextareaOnResizeDirective,
 	]
 })
 export class SharedModule {

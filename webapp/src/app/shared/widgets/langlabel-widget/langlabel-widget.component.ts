@@ -1,14 +1,15 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import {Component, ElementRef, QueryList, ViewChild, ViewChildren, ChangeDetectorRef} from '@angular/core';
 import {AbstractWidget} from '../abstract-widget';
+import {ResizedEvent} from 'angular-resize-event';
 
 @Component({
-	selector: 'app-language-label-widget',
-	templateUrl: './language-label-widget.component.html',
-	styleUrls: ['./language-label-widget.component.scss', '../widget.scss']
+	selector: 'app-langlabel-widget',
+	templateUrl: './langlabel-widget.component.html',
+	styleUrls: ['./langlabel-widget.component.scss', '../widget.scss']
 })
-export class LanguageLabelWidgetComponent extends AbstractWidget {
-	@ViewChildren(CdkTextareaAutosize) inputTextareas?: QueryList<CdkTextareaAutosize>;
+export class LangLabelWidgetComponent extends AbstractWidget {
+	@ViewChildren(CdkTextareaAutosize) inputTextareas!: QueryList<CdkTextareaAutosize>;
 	languages: string[] = [
 		'en_US',
 		'de_DE',
@@ -30,5 +31,9 @@ export class LanguageLabelWidgetComponent extends AbstractWidget {
 		return {
 			...this.languages
 		};
+	}
+	
+	resizeTextareas() {
+		this.inputTextareas.forEach(autosize => autosize.resizeToFitContent(true));
 	}
 }
