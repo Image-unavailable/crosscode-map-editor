@@ -58,10 +58,6 @@ export class StartNpcTradeMenu extends AbstractEvent<StartNpcTradeMenuData> {
 		return out;
 	}
 	
-	public get forceTreeRefresh(): boolean {
-		return true;
-	}
-	
 	protected generateNewDataInternal() {
 		return {
 			withBranches: false
