@@ -10,6 +10,7 @@ import { MainScene } from '../../shared/phaser/main-scene';
 import { HeightMapService } from '../../services/height-map/height-map.service';
 import { AutotileService } from '../../services/autotile/autotile.service';
 import { EntityRegistryService } from '../../shared/phaser/entities/registry/entity-registry.service';
+import { PhaserSleepWhileInactiveDirective } from '../../shared/phaser-sleep-while-inactive.directive';
 
 @Component({
 	selector: 'app-phaser',
@@ -19,6 +20,7 @@ import { EntityRegistryService } from '../../shared/phaser/entities/registry/ent
 export class PhaserComponent implements OnInit {
 	
 	@ViewChild('content', {static: true}) content!: ElementRef<HTMLElement>;
+	@ViewChild(PhaserSleepWhileInactiveDirective, {static: true}) sleepDirective!: PhaserSleepWhileInactiveDirective;
 	
 	constructor(
 		private element: ElementRef,
@@ -62,6 +64,9 @@ export class PhaserComponent implements OnInit {
 			scene: [scene]
 		});
 		Globals.scene = scene;
+		this.globalEvents.generateNewEntity.subscribe(() => this.sleepDirective.requestRedraw());
+		this.globalEvents.updateEntitySettings.subscribe(() => this.sleepDirective.requestRedraw());
+		this.globalEvents.filterEntity.subscribe(() => this.sleepDirective.requestRedraw());
 	}
 	
 	@HostListener('window:resize', ['$event'])
@@ -74,6 +79,10 @@ export class PhaserComponent implements OnInit {
 			scale.width,
 			scale.height
 		);
+	}
+	
+	get globalGame() {
+		return Globals.game;
 	}
 	
 	private getScale() {

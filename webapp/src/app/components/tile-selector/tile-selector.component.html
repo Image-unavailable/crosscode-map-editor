@@ -2,8 +2,14 @@
                      [top]="'240px'"
                      [title]="'Tile selector'"
                      (dragEnd)="onDragEnd()"
-                     [style.display]="hide ? 'none' : ''">
+                     [style.display]="hide ? 'none' : ''"
+					 >
 	<div class="tile-selector-container">
-		<div id="tile-selector-content"></div>
+		<div
+			id="tile-selector-content"
+			appPhaserSleepWhileInactive
+			[attachedGame]="display"
+			[activeOverride]="scene?.tilesetFullyRendered? undefined : true"
+		></div>
 	</div>
 </app-floating-window>

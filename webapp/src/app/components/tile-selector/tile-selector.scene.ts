@@ -87,6 +87,11 @@ export class TileSelectorScene extends Phaser.Scene {
 		this.game.scale.resize(size.width, size.height);
 	}
 	
+	//Needed for phaser sleep control in tile selector
+	public get tilesetFullyRendered() {
+		return this.tilesetRendered;
+	}
+	
 	private onMouseUp() {
 		if (!this.tilesetRendered) {
 			return;

@@ -15,6 +15,7 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {ModalDirective} from './modal.directive';
 import {KeepHtmlPipe} from './keep-html.pipe';
 import {OverlayModule} from './overlay/overlay.module';
+import {PhaserSleepWhileInactiveDirective} from './phaser-sleep-while-inactive.directive';
 
 import {HighlightDirective} from './highlight.directive';
 import {EntityRegistryService} from './phaser/entities/registry/entity-registry.service';
@@ -44,6 +45,7 @@ import { SplitPaneModule } from './split-pane/split-pane.module';
 		KeepHtmlPipe,
 		HighlightDirective,
 		ListSearchOverlayComponent,
+		PhaserSleepWhileInactiveDirective,
 	],
 	providers: [
 		HttpClientService,
@@ -67,6 +69,7 @@ import { SplitPaneModule } from './split-pane/split-pane.module';
 		KeepHtmlPipe,
 		HighlightDirective,
 		SplitPaneComponent,
+		PhaserSleepWhileInactiveDirective,
 	]
 })
 export class SharedModule {

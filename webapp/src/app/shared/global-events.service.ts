@@ -15,6 +15,7 @@ export class GlobalEventsService {
 	generateHeights = new Subject<boolean>();
 	offsetMap = new Subject<Point>();
 	toggleVisibility = new Subject<void>();
+	toggleLayerVisibility = new BehaviorSubject<void>(undefined);
 	showAddEntityMenu = new Subject<Point>();
 
 	updateCoords = new Subject<Point3 | undefined>();
