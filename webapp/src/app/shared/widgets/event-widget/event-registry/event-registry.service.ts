@@ -3,6 +3,7 @@ import {AddMsgPerson} from './add-msg-person';
 import {DefaultEvent} from './default-event';
 import {If} from './if';
 import {ShowMsg} from './show-msg';
+import {ShowSideMsg} from './show-side-msg';
 import {ShowChoice} from './ShowChoice';
 import {OpenQuestDialog} from './open-quest-dialogue';
 import {SetPlayerCore} from './set-player-core';
@@ -32,6 +33,7 @@ export class EventRegistryService {
 		this.setDefaultEvent(DefaultEvent);
 		this.register('ADD_MSG_PERSON', AddMsgPerson);
 		this.register('SHOW_MSG', ShowMsg);
+		this.register('SHOW_SIDE_MSG', ShowSideMsg);
 		this.register('SHOW_CHOICE', ShowChoice);
 		this.register('IF', If);
 		this.register('SET_PLAYER_CORE', SetPlayerCore);
