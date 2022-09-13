@@ -85,7 +85,7 @@ import { SplitPaneModule } from './split-pane/split-pane.module';
 		KeepHtmlPipe,
 		SettingsComponent,
 		HighlightDirective,
-		SplitPaneComponent
+		SplitPaneComponent,
 	]
 })
 export class SharedModule {
