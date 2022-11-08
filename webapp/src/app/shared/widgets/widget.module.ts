@@ -29,6 +29,9 @@ import {AddEventService} from './event-widget/event-editor/add/add-event.service
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { EnemyTypeWidgetComponent } from './enemy-type-widget/enemy-type-widget.component';
 import { EnemyTypeWidgetOverlayComponent } from './enemy-type-widget/enemy-type-overlay/enemy-type-overlay.component';
+import {LangLabelWidgetComponent} from './langlabel-widget/langlabel-widget.component';
+import {AngularResizeEventModule} from 'angular-resize-event';
+import {AutocompletedTextboxComponent} from './string-widget/autocompleted-textbox/autocompleted-textbox.component';
 
 const COMPONENTS = [
 	StringWidgetComponent,
@@ -44,6 +47,8 @@ const COMPONENTS = [
 	CharacterWidgetComponent,
 	PersonExpressionWidgetComponent,
 	EnemyTypeWidgetComponent,
+	LangLabelWidgetComponent,
+	AutocompletedTextboxComponent,
 ];
 
 const PRIVATE_COMPONENTS = [
@@ -63,7 +68,8 @@ const PRIVATE_COMPONENTS = [
 		AngularDraggableModule,
 		DragDropModule,
 		ScrollingModule,
-		SharedModule
+		SharedModule,
+		AngularResizeEventModule,
 	],
 	providers: [
 		EventRegistryService,

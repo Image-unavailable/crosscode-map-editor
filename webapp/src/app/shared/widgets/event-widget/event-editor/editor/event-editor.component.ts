@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnChanges, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, Output, OnChanges, OnInit, OnDestroy, ViewChild, EventEmitter } from '@angular/core';
 import { AbstractEvent, EventType } from '../../event-registry/abstract-event';
+import { EventArray, EventArrayType, destructureEventArray, createEventArray } from '../../../../../models/events';
 import { EventHelperService } from '../event-helper.service';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
@@ -8,7 +9,7 @@ import { SplitPaneComponent } from '../../../../split-pane/split-pane.component'
 import { EventDisplay } from '../event-display.model';
 import { AddEventService } from '../add/add-event.service';
 import { EventHistory } from './event-history';
-import { EventDetailComponent } from '../detail/event-detail.component';
+import { EventDetailComponent, RefreshType } from '../detail/event-detail.component';
 import { SettingsService } from '../../../../settings.service';
 
 @Component({
@@ -24,8 +25,10 @@ export class EventEditorComponent implements OnChanges, OnInit {
 	@ViewChild('eventDetail', {static: true}) eventDetail?: unknown; //EventDetailComponent but it errors for some reason
 	@ViewChild('eventTree', {read: ElementRef}) eventTree?: ElementRef<HTMLElement>;
 	
-	@Input() eventData: EventType[] = [];
+	@Input() eventData: EventArray | unknown = [];
 	@Input() actionStep = false;
+	
+	@Output() eventsChanged = new EventEmitter<EventType[]>();
 	
 	get base() {
 		return EventEditorComponent.globalBase;
@@ -49,7 +52,7 @@ export class EventEditorComponent implements OnChanges, OnInit {
 	dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 	
 	private history = new EventHistory();
-	private workingData!: AbstractEvent<any>[];
+	private workingData: AbstractEvent<any>[] = [];
 	private selectedNode?: EventDisplay;
 	private shownNode?: EventDisplay;
 	private copiedNode?: EventDisplay;
@@ -66,15 +69,18 @@ export class EventEditorComponent implements OnChanges, OnInit {
 	}
 	
 	ngOnChanges() {
-		let cpy = JSON.parse(JSON.stringify(this.eventData));
-		if (!cpy.map) {
-			// TODO: find out how to properly handle quests
-			cpy = cpy.quest;
-		}
-		if (cpy.map) {
-			this.workingData = cpy.map((val: EventType) => this.helper.getEventFromType(val, this.actionStep));
-		} else {
+		const eventCopy: EventArray = JSON.parse(JSON.stringify(this.eventData));
+		try {
+			const {events} = destructureEventArray(eventCopy);
+			this.workingData = events?.map((val: EventType) => this.helper.getEventFromType(val, this.actionStep)) ?? [];
+		} catch (destructuringError) {
 			this.workingData = [];
+			if (destructuringError instanceof TypeError) {
+				console.error(`Error while reading events, invalid format. Using empty event array as fallback.\n\nException:\n${destructuringError.stack}`);
+			} else {
+				console.error('Unknown exception while reading events. Using empty event array as fallback.\n\nException in message below.');
+				console.error(destructuringError);
+			}
 		}
 		this.refreshAll();
 	}
@@ -88,12 +94,12 @@ export class EventEditorComponent implements OnChanges, OnInit {
 		return index < this.treeControl.dataNodes.length - 1;
 	}
 	
-	refresh() {
+	refresh(refreshType: RefreshType) {
 		if (this.shownNode) {
 			this.shownNode.text = this.shownNode.data?.info ?? ' ';
 			this.shownNode.changeDetector?.detectChanges();
 			
-			if (this.shownNode.children) {
+			if (refreshType === 'Full') {
 				this.refreshAll();
 			}
 		}
@@ -103,8 +109,8 @@ export class EventEditorComponent implements OnChanges, OnInit {
 		this.detailsShown = false;
 	}
 	
-	export() {
-		return this.workingData?.map(event => event.export()) ?? this.eventData;
+	export(): EventType[] {
+		return this.workingData.map(event => event.export());
 	}
 	
 	drop(event: CdkDragDrop<EventDisplay>) {
@@ -312,7 +318,7 @@ export class EventEditorComponent implements OnChanges, OnInit {
 		if (this.copiedNode) {
 			this.history.add(this.getParent(this.selectedNode));
 			
-			const cpy = JSON.parse(JSON.stringify(this.copiedNode.data?.data));
+			const cpy = JSON.parse(JSON.stringify(this.copiedNode.data?.export()));
 			const event = this.helper.getEventFromType(cpy, this.actionStep);
 			
 			const index = !this.selectedNode ? 0 : this.getIndex(this.selectedNode!);
@@ -354,6 +360,7 @@ export class EventEditorComponent implements OnChanges, OnInit {
 			this.select(node);
 		}
 		this.detailsShown = shown;
+		this.eventsChanged.emit(this.export());
 	}
 	
 	private getIndex(event: EventDisplay | null | undefined) {

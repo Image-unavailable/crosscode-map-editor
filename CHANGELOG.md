@@ -4,6 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+## [0.17.0] 2022-10-18
+
+### Fixed
+- Replaced `hide` property of NPCs with `hidden`, which is now saved correctly as a boolean value.
+- Fixed buggy behaviour when two checkboxes that refer to properties with the same name are visible at the same time ([#240](https://github.com/CCDirectLink/crosscode-map-editor/issues/240)).
+
+### Changed
+- Clicking the label of a property now no longer selects the input for that property.
+
+## [0.16.0] 2022-10-03
+
+### Added
+- New editor for `langlabel` properties.
+
+## [0.15.1] 2022-09-28
+
+### Fixed
+- `WallHorizontal` and `WallVertical` are now created with the correct default size on their non-resizable axis.
+
+## [0.15.0] 2022-09-27
+
+### Fixed
+- Typo in settings panel.
+- Fixed compatibility with the newer Electron versions.
+- Enemy editing popup no longer bugs out when editing enemies inside event steps.
+- Fixed copy-pasting of `IF` steps and other steps with branches.
+- Fixed inability to edit certain `String` properties of various event and action steps.
+
+### Changed
+- `String` inputs for event steps, action steps, and entity properties, as well as the map creation dialog now also allow values different from the suggested ones.
+
+## [0.14.0] 2022-05-28
+- Add coordinate display for the cursor in entity view
+
+## [0.13.0] 2021-11-23
+
+### Added
+- Full event editor support for `quest`, `shop`, `arena` and `trade` events
+- Ability to view and edit `OPEN_QUEST_DIALOG` event branches
+- Ability to view and edit `START_NPC_TRADE_MENU` event branches
+
+### Fixed
+- Changes in the number of choices of `SHOW_CHOICE` events now update the branches visible in the event editor immediately
+
 ## [0.12.0] 2021-10-05
 
 ### Added
